@@ -1,0 +1,4 @@
+github.com/wbrown/llmapi v0.0.0-20260306155236-40bc5eb4803e h1:8YQySL7EkKukeJe8E3cxtmO9XwWfgjElZtrJDvd7QDU=
+github.com/wbrown/llmapi v0.0.0-20260306155236-40bc5eb4803e/go.mod h1:Xfi3YTGRYZ/OuDWSFDPSW8vmIMgG1P0p4pmlggqOIos=
+github.com/wbrown/tinyoai v0.0.0-20260614034019-f2b3f73e7dae h1:bgYzg1laY0kNl2Hm4LxIdTQzaco11ZJzNp7R2vJ5U9M=
+github.com/wbrown/tinyoai v0.0.0-20260614034019-f2b3f73e7dae/go.mod h1:GLZsHTGgcGqWQnmxJ9xXJogpvJrVAgnltIqJV/gqs1s=
