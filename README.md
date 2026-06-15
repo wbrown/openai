@@ -9,7 +9,8 @@ against `llmapi` can switch providers with no changes.
 
 Because it speaks plain Chat Completions, `SetEndpoint` points it at any
 OpenAI-compatible server — Azure OpenAI, vLLM, Together, Groq, OpenRouter, or a
-local llama.cpp / Ollama endpoint.
+local llama.cpp / Ollama endpoint. The endpoint is a **base URL** (the `/v1`
+root, e.g. `http://host:8000/v1`); `/chat/completions` is appended per request.
 
 ## Usage
 
@@ -20,7 +21,9 @@ reply, stopReason, inTok, outTok, _, cacheRead, err := conv.Send("Hello!", llmap
 ```
 
 The API token is read from `OPENAI_API_KEY` (or `~/.openai_key`, `./.openai_key`)
-into `DefaultApiToken`; set `conv.ApiToken` to override per conversation.
+into `DefaultApiToken`; set `conv.ApiToken` to override per conversation. **Auth
+is optional** — when the token is empty, no `Authorization` header is sent, so
+the client works against unauthenticated local servers (e.g. a default vLLM).
 
 ### Streaming
 

@@ -117,9 +117,6 @@ func (c *Conversation) SendRichStreaming(content []llmapi.ContentBlock, sampling
 // postStreaming sends a streaming request and returns the response body for SSE
 // parsing. It uses a client with no timeout so the stream is not cut short.
 func (c *Conversation) postStreaming(req chatCompletionRequest) (io.ReadCloser, error) {
-	if c.ApiToken == "" {
-		return nil, fmt.Errorf("API token not set")
-	}
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request: %w", err)
@@ -138,7 +135,9 @@ func (c *Conversation) postStreaming(req chatCompletionRequest) (io.ReadCloser, 
 			return nil, fmt.Errorf("error creating request: %w", reqErr)
 		}
 		httpReq.Header.Set("Content-Type", "application/json")
-		httpReq.Header.Set("Authorization", "Bearer "+c.ApiToken)
+		if c.ApiToken != "" {
+			httpReq.Header.Set("Authorization", "Bearer "+c.ApiToken)
+		}
 		httpReq.Header.Set("Accept", "text/event-stream")
 
 		resp, lastErr = client.Do(httpReq)

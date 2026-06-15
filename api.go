@@ -17,10 +17,11 @@ import (
 // Compile-time interface check.
 var _ llmapi.Conversation = (*Conversation)(nil)
 
-// DefaultBaseURL is the OpenAI Chat Completions endpoint. Override per
-// conversation via SetEndpoint to target Azure OpenAI or any OpenAI-compatible
-// server (vLLM, Together, Groq, OpenRouter, llama.cpp, ...).
-var DefaultBaseURL = "https://api.openai.com/v1/chat/completions"
+// DefaultBaseURL is the OpenAI API base URL (the "/v1" root); the request path
+// "/chat/completions" is appended to it. Override per conversation via
+// SetEndpoint to target Azure OpenAI or any OpenAI-compatible server (vLLM,
+// Together, Groq, OpenRouter, llama.cpp, ...) — pass the base URL ending in /v1.
+var DefaultBaseURL = "https://api.openai.com/v1"
 
 // DefaultApiToken is loaded from OPENAI_API_KEY (or a token file) in init().
 // It seeds the ApiToken of every conversation created with NewConversation and
@@ -54,7 +55,8 @@ type Conversation struct {
 	HttpClient *http.Client
 	// Tools are the tool definitions offered to the model.
 	Tools []llmapi.ToolDefinition
-	// Endpoint overrides DefaultBaseURL when non-empty.
+	// Endpoint overrides DefaultBaseURL when non-empty. It is a base URL (the
+	// "/v1" root); "/chat/completions" is appended to it per request.
 	Endpoint string
 }
 
@@ -78,15 +80,19 @@ func (c *Conversation) context() context.Context {
 	return context.Background()
 }
 
-// endpoint returns the effective API endpoint URL.
+// endpoint returns the full chat-completions URL: the configured base URL (or
+// DefaultBaseURL) with "/chat/completions" appended.
 func (c *Conversation) endpoint() string {
-	if c.Endpoint != "" {
-		return c.Endpoint
+	base := c.Endpoint
+	if base == "" {
+		base = DefaultBaseURL
 	}
-	return DefaultBaseURL
+	return strings.TrimRight(base, "/") + "/chat/completions"
 }
 
-// SetEndpoint overrides the API endpoint URL. Pass "" to revert to DefaultBaseURL.
+// SetEndpoint overrides the API base URL (the "/v1" root, e.g.
+// "http://host:8000/v1"); "/chat/completions" is appended per request. Pass ""
+// to revert to DefaultBaseURL.
 func (c *Conversation) SetEndpoint(endpoint string) {
 	c.Endpoint = endpoint
 }
@@ -189,10 +195,6 @@ func toOpenAITools(defs []llmapi.ToolDefinition) []tool {
 // postRequest marshals and sends a non-streaming request, retrying transport
 // errors, and returns the parsed response.
 func (c *Conversation) postRequest(req chatCompletionRequest) (*chatCompletionResponse, error) {
-	if c.ApiToken == "" {
-		return nil, fmt.Errorf("API token not set")
-	}
-
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request: %w", err)
@@ -206,7 +208,9 @@ func (c *Conversation) postRequest(req chatCompletionRequest) (*chatCompletionRe
 			return nil, fmt.Errorf("error creating request: %w", reqErr)
 		}
 		httpReq.Header.Set("Content-Type", "application/json")
-		httpReq.Header.Set("Authorization", "Bearer "+c.ApiToken)
+		if c.ApiToken != "" {
+			httpReq.Header.Set("Authorization", "Bearer "+c.ApiToken)
+		}
 
 		resp, lastErr = c.HttpClient.Do(httpReq)
 		if lastErr == nil {

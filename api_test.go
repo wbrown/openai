@@ -18,18 +18,27 @@ import (
 // real tinyoai inference server. It is test infrastructure for asserting the
 // client's wire format; the production server carries no such state.
 type recordingHandler struct {
-	inner    http.Handler
-	mu       sync.Mutex
-	lastBody []byte
+	inner      http.Handler
+	mu         sync.Mutex
+	lastBody   []byte
+	lastHeader http.Header
 }
 
 func (h *recordingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 	h.mu.Lock()
 	h.lastBody = body
+	h.lastHeader = r.Header.Clone()
 	h.mu.Unlock()
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	h.inner.ServeHTTP(w, r)
+}
+
+// lastAuth returns the Authorization header captured from the most recent request.
+func (h *recordingHandler) lastAuth() string {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.lastHeader.Get("Authorization")
 }
 
 // lastRequest decodes the most recently captured request body.
@@ -57,9 +66,9 @@ func newConversation(t *testing.T, system string) (*Conversation, *recordingHand
 	t.Cleanup(srv.Close)
 
 	conv := NewConversation(system)
-	conv.SetEndpoint(srv.URL + "/v1/chat/completions")
+	conv.SetEndpoint(srv.URL) // base URL; the client appends /chat/completions
 	conv.SetModel("stories260K")
-	conv.ApiToken = "test-key" // tinyoai ignores auth; the client requires non-empty
+	conv.ApiToken = "test-key" // tinyoai ignores auth; a non-empty token exercises the Authorization path
 	return conv, rec
 }
 
@@ -443,6 +452,31 @@ func TestCachingEnableIsNoop(t *testing.T) {
 	if err := conv.DisableConversationCaching(); err != nil {
 		t.Errorf("DisableConversationCaching: %v", err)
 	}
+}
+
+func TestAuthHeaderOptional(t *testing.T) {
+	t.Run("with token", func(t *testing.T) {
+		conv, rec := newConversation(t, "")
+		conv.ApiToken = "secret-key"
+		conv.Settings.MaxTokens = 4
+		if _, _, _, _, _, _, err := conv.Send("Once upon a time", llmapi.Sampling{}); err != nil {
+			t.Fatalf("Send: %v", err)
+		}
+		if got := rec.lastAuth(); got != "Bearer secret-key" {
+			t.Errorf("Authorization = %q, want %q", got, "Bearer secret-key")
+		}
+	})
+	t.Run("without token", func(t *testing.T) {
+		conv, rec := newConversation(t, "")
+		conv.ApiToken = "" // no key, like a local vLLM endpoint
+		conv.Settings.MaxTokens = 4
+		if _, _, _, _, _, _, err := conv.Send("Once upon a time", llmapi.Sampling{}); err != nil {
+			t.Fatalf("Send with no token must succeed: %v", err)
+		}
+		if got := rec.lastAuth(); got != "" {
+			t.Errorf("Authorization should be absent for a tokenless conversation, got %q", got)
+		}
+	})
 }
 
 // requestMessagesField extracts the messages array from a decoded request body.
