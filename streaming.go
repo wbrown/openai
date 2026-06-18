@@ -187,7 +187,7 @@ func parseSSEStream(body io.Reader, callback llmapi.StreamCallback) (
 		data := strings.TrimPrefix(line, "data: ")
 		if data == "[DONE]" {
 			if callback != nil {
-				callback("", true)
+				callback(llmapi.StreamDelta{Done: true})
 			}
 			break
 		}
@@ -203,10 +203,19 @@ func parseSSEStream(body io.Reader, callback llmapi.StreamCallback) (
 			cacheReadTokens = chunk.Usage.PromptTokensDetails.CachedTokens
 		}
 		for _, choice := range chunk.Choices {
+			// Reasoning models (e.g. vLLM-served GLM/DeepSeek launched with a
+			// reasoning parser) stream their chain-of-thought in a separate
+			// reasoning_content field. Surface it through the callback tagged as
+			// TokenReasoning so consumers can route it, but do NOT write it to
+			// textBuilder: the returned reply is the generated content only —
+			// reasoning is not part of it.
+			if choice.Delta.ReasoningContent != "" && callback != nil {
+				callback(llmapi.StreamDelta{Text: choice.Delta.ReasoningContent, Kind: llmapi.TokenReasoning})
+			}
 			if choice.Delta.Content != "" {
 				textBuilder.WriteString(choice.Delta.Content)
 				if callback != nil {
-					callback(choice.Delta.Content, false)
+					callback(llmapi.StreamDelta{Text: choice.Delta.Content, Kind: llmapi.TokenContent})
 				}
 			}
 			for _, tc := range choice.Delta.ToolCalls {

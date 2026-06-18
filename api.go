@@ -146,7 +146,18 @@ func (c *Conversation) buildRequest(sampling llmapi.Sampling, stream bool) (chat
 		req.Stream = true
 		req.StreamOptions = &streamOptions{IncludeUsage: true}
 	}
+	req.ChatTemplateKwargs = reasoningKwargs(sampling.ReasoningEffort)
 	return req, nil
+}
+
+// reasoningKwargs maps the requested reasoning effort to vLLM chat-template kwargs:
+// ReasoningOff disables thinking; any level requests that reasoning_effort. vLLM-
+// served GLM/DeepSeek read these from the request's chat_template_kwargs.
+func reasoningKwargs(e llmapi.ReasoningEffort) map[string]any {
+	if e == llmapi.ReasoningOff {
+		return map[string]any{"enable_thinking": false}
+	}
+	return map[string]any{"reasoning_effort": e.String()}
 }
 
 // resolveSampling layers per-call overrides over conversation defaults and

@@ -173,13 +173,13 @@ func TestStreaming(t *testing.T) {
 
 	var chunks []string
 	var sawDone bool
-	cb := func(text string, done bool) {
-		if done {
+	cb := func(d llmapi.StreamDelta) {
+		if d.Done {
 			sawDone = true
 			return
 		}
-		if text != "" {
-			chunks = append(chunks, text)
+		if d.Text != "" {
+			chunks = append(chunks, d.Text)
 		}
 	}
 
@@ -205,6 +205,124 @@ func TestStreaming(t *testing.T) {
 	}
 	if stop != "end_turn" && stop != "max_tokens" {
 		t.Errorf("unexpected stop %q", stop)
+	}
+}
+
+// TestParseSSEStreamReasoningContent feeds the parser a crafted OpenAI-compatible
+// SSE stream interleaving reasoning_content and content deltas — the wire shape a
+// vLLM server launched with a reasoning parser (GLM/DeepSeek) emits. tinyoai is a
+// real transformer with no reasoning concept, so this path cannot be exercised
+// through it; parseSSEStream takes a plain io.Reader, so we drive it directly with
+// the controlled wire bytes a reasoning server would send. Contract: reasoning is
+// forwarded live through the callback (so it is visible), but is NOT part of the
+// returned reply (the generated content), so it never lands in stored output.
+//
+// stopReason is asserted as the raw "stop": parseSSEStream returns the
+// un-normalized finish_reason (streaming.go: stopReason = *choice.FinishReason);
+// the stop→end_turn mapping happens downstream in SendStreaming via
+// normalizeFinishReason(rawStop), which is why TestStreaming (calling the public
+// SendStreaming) sees "end_turn" while this direct-parser test sees "stop".
+func TestParseSSEStreamReasoningContent(t *testing.T) {
+	// Distinct reasoning vs content strings so assertions can tell them apart.
+	const reasoningA = "Let me reason about the request. "
+	const reasoningB = "Two steps, then answer."
+	const contentA = "The final "
+	const contentB = "answer is here."
+
+	chunk := func(delta string) string {
+		return `data: {"choices":[{"index":0,"delta":` + delta + `}]}`
+	}
+	sse := strings.Join([]string{
+		chunk(`{"role":"assistant"}`),
+		chunk(`{"reasoning_content":"` + reasoningA + `"}`),
+		chunk(`{"reasoning_content":"` + reasoningB + `"}`),
+		chunk(`{"content":"` + contentA + `"}`),
+		chunk(`{"content":"` + contentB + `"}`),
+		`data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}`,
+		"data: [DONE]",
+		"",
+	}, "\n\n")
+
+	var reasoning, content strings.Builder
+	var sawDone bool
+	cb := func(d llmapi.StreamDelta) {
+		if d.Done {
+			sawDone = true
+			return
+		}
+		switch d.Kind {
+		case llmapi.TokenReasoning:
+			reasoning.WriteString(d.Text)
+		case llmapi.TokenContent:
+			content.WriteString(d.Text)
+		}
+	}
+
+	text, _, stopReason, _, _, _, err := parseSSEStream(strings.NewReader(sse), cb)
+	if err != nil {
+		t.Fatalf("parseSSEStream: %v", err)
+	}
+
+	// Reasoning deltas are tagged TokenReasoning and carry the chain-of-thought;
+	// content deltas are tagged TokenContent and carry the answer.
+	if got := reasoning.String(); got != reasoningA+reasoningB {
+		t.Errorf("reasoning stream = %q, want %q", got, reasoningA+reasoningB)
+	}
+	if got := content.String(); got != contentA+contentB {
+		t.Errorf("content stream = %q, want %q", got, contentA+contentB)
+	}
+
+	// The returned reply is the generated content ONLY — reasoning must not leak in.
+	if want := contentA + contentB; text != want {
+		t.Errorf("reply = %q, want %q (content only, no reasoning)", text, want)
+	}
+
+	if !sawDone {
+		t.Error("callback never signaled done")
+	}
+	// Raw finish_reason from the parser; see the doc comment above.
+	if stopReason != "stop" {
+		t.Errorf("stop = %q, want %q", stopReason, "stop")
+	}
+}
+
+// TestReasoningEffortChatTemplateKwargs pins the per-call reasoning-effort mapping
+// into vLLM chat_template_kwargs: ReasoningOff -> {"enable_thinking": false}, every
+// level -> {"reasoning_effort": "<level>"}. The zero value (ReasoningOff) means a
+// bare Sampling{} disables reasoning by default.
+func TestReasoningEffortChatTemplateKwargs(t *testing.T) {
+	cases := []struct {
+		effort  llmapi.ReasoningEffort
+		wantKey string
+		wantVal any
+	}{
+		{llmapi.ReasoningOff, "enable_thinking", false},
+		{llmapi.ReasoningLow, "reasoning_effort", "low"},
+		{llmapi.ReasoningMedium, "reasoning_effort", "medium"},
+		{llmapi.ReasoningHigh, "reasoning_effort", "high"},
+		{llmapi.ReasoningMax, "reasoning_effort", "max"},
+	}
+	for _, tc := range cases {
+		conv := NewConversation("")
+		conv.SetModel("glm-5.2-fp8")
+		conv.AddMessage(llmapi.RoleUser, "hi")
+		req, err := conv.buildRequest(llmapi.Sampling{ReasoningEffort: tc.effort}, false)
+		if err != nil {
+			t.Fatalf("effort %v: buildRequest: %v", tc.effort, err)
+		}
+		if got, ok := req.ChatTemplateKwargs[tc.wantKey]; !ok || got != tc.wantVal {
+			t.Errorf("effort %v: chat_template_kwargs[%q] = %v (present=%v), want %v",
+				tc.effort, tc.wantKey, got, ok, tc.wantVal)
+		}
+		// Exactly one of the two keys is set — the level vs off split.
+		_, hasEffort := req.ChatTemplateKwargs["reasoning_effort"]
+		_, hasEnable := req.ChatTemplateKwargs["enable_thinking"]
+		if tc.effort == llmapi.ReasoningOff && hasEffort {
+			t.Errorf("off must not set reasoning_effort")
+		}
+		if tc.effort != llmapi.ReasoningOff && hasEnable {
+			t.Errorf("effort %v must not set enable_thinking", tc.effort)
+		}
 	}
 }
 
