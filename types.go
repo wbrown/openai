@@ -71,6 +71,10 @@ type chatCompletionRequest struct {
 	Tools               []tool         `json:"tools,omitempty"`
 	Stream              bool           `json:"stream,omitempty"`
 	StreamOptions       *streamOptions `json:"stream_options,omitempty"`
+	// ChatTemplateKwargs carries vLLM chat-template kwargs at the request top level
+	// (where the OpenAI SDK's extra_body lands). Used to drive reasoning effort:
+	// {"enable_thinking": false} to disable, or {"reasoning_effort": "<level>"}.
+	ChatTemplateKwargs map[string]any `json:"chat_template_kwargs,omitempty"`
 }
 
 // chatMessage is a single message in the request messages array.
@@ -192,9 +196,10 @@ type streamChunk struct {
 	Choices []struct {
 		Index int `json:"index"`
 		Delta struct {
-			Role      string     `json:"role"`
-			Content   string     `json:"content"`
-			ToolCalls []toolCall `json:"tool_calls,omitempty"`
+			Role             string     `json:"role"`
+			Content          string     `json:"content"`
+			ReasoningContent string     `json:"reasoning_content"`
+			ToolCalls        []toolCall `json:"tool_calls,omitempty"`
 		} `json:"delta"`
 		FinishReason *string `json:"finish_reason"`
 	} `json:"choices"`
