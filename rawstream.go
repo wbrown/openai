@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/wbrown/llmapi"
@@ -28,6 +29,9 @@ import (
 //     delta.reasoning_content (what parseSSEStream reads), delta.content, or
 //     some other field — a mismatch means reasoning bytes arrive but no delta
 //     is emitted, so an idle watchdog sees silence and cancels.
+//   - message↔token ratio: the end-of-stream TALLY counts reasoning vs content
+//     messages and divides the server's completion_tokens by total messages, to
+//     show whether the server emits one token per SSE message or batches them.
 //
 // The request body comes from the same buildRequest path production uses, so
 // what you see on the wire is what production sends, including the
@@ -60,6 +64,9 @@ func (c *Conversation) StreamRaw(text string, sampling llmapi.Sampling, w io.Wri
 	scanner := bufio.NewScanner(body)
 	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	var last time.Time
+	var reasoningMsgs, reasoningRunes, contentMsgs, contentRunes int
+	var sawUsage bool
+	var promptTokens, completionTokens int
 	for scanner.Scan() {
 		now := time.Now()
 		line := scanner.Text()
@@ -72,10 +79,52 @@ func (c *Conversation) StreamRaw(text string, sampling llmapi.Sampling, w io.Wri
 		}
 		last = now
 		fmt.Fprintf(w, "[%10s%s] %s\n", time.Since(start).Round(time.Millisecond), gap, line)
+
+		// Tally per-kind message counts and capture the server's usage. Each SSE
+		// data event is one "message"; counting reasoning vs content messages and
+		// dividing the server's completion_tokens by the total shows whether the
+		// server emits one token per message or batches several per message.
+		data, ok := strings.CutPrefix(line, "data: ")
+		if !ok || data == "[DONE]" {
+			continue
+		}
+		var chunk streamChunk
+		if json.Unmarshal([]byte(data), &chunk) != nil {
+			continue
+		}
+		if chunk.Usage != nil {
+			sawUsage = true
+			promptTokens = chunk.Usage.PromptTokens
+			completionTokens = chunk.Usage.CompletionTokens
+		}
+		for _, ch := range chunk.Choices {
+			if r := ch.Delta.ReasoningContent; r != "" {
+				reasoningMsgs++
+				reasoningRunes += len([]rune(r))
+			} else if r := ch.Delta.Reasoning; r != "" {
+				reasoningMsgs++
+				reasoningRunes += len([]rune(r))
+			}
+			if ch.Delta.Content != "" {
+				contentMsgs++
+				contentRunes += len([]rune(ch.Delta.Content))
+			}
+		}
 	}
 	if scanErr := scanner.Err(); scanErr != nil {
 		return fmt.Errorf("error reading stream after %s: %w", time.Since(start).Round(time.Millisecond), scanErr)
 	}
 	fmt.Fprintf(w, "=== stream ended after %s ===\n", time.Since(start).Round(time.Millisecond))
+
+	totalMsgs := reasoningMsgs + contentMsgs
+	fmt.Fprintf(w, "=== TALLY ===\n")
+	fmt.Fprintf(w, "reasoning: %d messages, %d runes\n", reasoningMsgs, reasoningRunes)
+	fmt.Fprintf(w, "content:   %d messages, %d runes\n", contentMsgs, contentRunes)
+	if sawUsage {
+		fmt.Fprintf(w, "server usage: prompt_tokens=%d completion_tokens=%d (completion = reasoning+content, no split)\n", promptTokens, completionTokens)
+		if totalMsgs > 0 {
+			fmt.Fprintf(w, "%d completion tokens / %d streamed messages = %.2f tokens per message\n", completionTokens, totalMsgs, float64(completionTokens)/float64(totalMsgs))
+		}
+	}
 	return nil
 }
