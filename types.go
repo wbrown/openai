@@ -196,9 +196,14 @@ type streamChunk struct {
 	Choices []struct {
 		Index int `json:"index"`
 		Delta struct {
-			Role             string     `json:"role"`
-			Content          string     `json:"content"`
+			Role    string `json:"role"`
+			Content string `json:"content"`
+			// Reasoning models stream chain-of-thought in a separate field whose
+			// name varies across OpenAI-compatible servers: DeepSeek and older vLLM
+			// reasoning parsers use reasoning_content; vLLM's GLM parser (0.23+) and
+			// OpenRouter use reasoning. Capture both; parseSSEStream coalesces them.
 			ReasoningContent string     `json:"reasoning_content"`
+			Reasoning        string     `json:"reasoning"`
 			ToolCalls        []toolCall `json:"tool_calls,omitempty"`
 		} `json:"delta"`
 		FinishReason *string `json:"finish_reason"`
