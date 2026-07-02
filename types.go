@@ -19,10 +19,19 @@ type Settings struct {
 	// There is no default — model selection is the caller's decision. Send
 	// returns an error if Model is empty.
 	Model string
-	// MaxTokens caps generated tokens. Sent as max_completion_tokens (the
-	// modern field; max_tokens is deprecated for chat completions and rejected
-	// by reasoning models). Omitted when 0.
+	// MaxTokens is the default DESIRED OUTPUT for calls that don't specify
+	// llmapi.Sampling.DesiredOutputTokens — how much real content a call
+	// wants, not the wire cap. The wire max_completion_tokens (the modern
+	// field; max_tokens is deprecated for chat completions and rejected by
+	// reasoning models) is computed per call by resolveCompletionBudget:
+	// desired plus the requested effort's reasoning headroom, clamped to
+	// OutputCeiling. Omitted when 0 and no per-call desired is set.
 	MaxTokens int
+	// OutputCeiling is the deployment's real per-request output limit — the
+	// most completion tokens this endpoint will actually serve. Deployment
+	// config, not model taxonomy: the library cannot know a vLLM deployment's
+	// limit, so the caller supplies it. 0 = unknown, no clamp.
+	OutputCeiling int
 	// Temperature controls randomness (0.0-2.0). Omitted when 0.
 	Temperature float64
 	// TopP is nucleus sampling (0.0-1.0). Omitted when 0.
