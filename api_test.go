@@ -288,40 +288,51 @@ func TestParseSSEStreamReasoningContent(t *testing.T) {
 
 // TestReasoningEffortChatTemplateKwargs pins the per-call reasoning-effort mapping
 // into vLLM chat_template_kwargs: ReasoningOff -> {"enable_thinking": false}, every
-// level -> {"reasoning_effort": "<level>"}. The zero value (ReasoningOff) means a
-// bare Sampling{} disables reasoning by default.
+// other level -> {"thinking": true, "enable_thinking": true, "reasoning_effort":
+// "<level>"}. All three on-conventions are sent explicitly so a template keyed off
+// any one of them (including Qwen3-style enable_thinking, which some chat templates
+// treat as off when absent rather than defaulting to on) actually reasons. The zero
+// value (ReasoningOff) means a bare Sampling{} disables reasoning by default.
 func TestReasoningEffortChatTemplateKwargs(t *testing.T) {
-	cases := []struct {
-		effort  llmapi.ReasoningEffort
-		wantKey string
-		wantVal any
-	}{
-		{llmapi.ReasoningOff, "enable_thinking", false},
-		{llmapi.ReasoningLow, "reasoning_effort", "low"},
-		{llmapi.ReasoningMedium, "reasoning_effort", "medium"},
-		{llmapi.ReasoningHigh, "reasoning_effort", "high"},
-		{llmapi.ReasoningMax, "reasoning_effort", "max"},
-	}
-	for _, tc := range cases {
+	levels := []llmapi.ReasoningEffort{llmapi.ReasoningLow, llmapi.ReasoningMedium, llmapi.ReasoningHigh, llmapi.ReasoningMax}
+
+	// ReasoningOff: only enable_thinking:false, nothing else.
+	{
 		conv := NewConversation("")
 		conv.SetModel("test-model")
 		conv.AddMessage(llmapi.RoleUser, "hi")
-		req, err := conv.buildRequest(llmapi.Sampling{ReasoningEffort: tc.effort}, false)
+		req, err := conv.buildRequest(llmapi.Sampling{ReasoningEffort: llmapi.ReasoningOff}, false)
 		if err != nil {
-			t.Fatalf("effort %v: buildRequest: %v", tc.effort, err)
+			t.Fatalf("effort off: buildRequest: %v", err)
 		}
-		if got, ok := req.ChatTemplateKwargs[tc.wantKey]; !ok || got != tc.wantVal {
-			t.Errorf("effort %v: chat_template_kwargs[%q] = %v (present=%v), want %v",
-				tc.effort, tc.wantKey, got, ok, tc.wantVal)
+		if got, ok := req.ChatTemplateKwargs["enable_thinking"]; !ok || got != false {
+			t.Errorf("off: chat_template_kwargs[enable_thinking] = %v (present=%v), want false", got, ok)
 		}
-		// Exactly one of the two keys is set — the level vs off split.
-		_, hasEffort := req.ChatTemplateKwargs["reasoning_effort"]
-		_, hasEnable := req.ChatTemplateKwargs["enable_thinking"]
-		if tc.effort == llmapi.ReasoningOff && hasEffort {
-			t.Errorf("off must not set reasoning_effort")
+		if _, ok := req.ChatTemplateKwargs["reasoning_effort"]; ok {
+			t.Error("off must not set reasoning_effort")
 		}
-		if tc.effort != llmapi.ReasoningOff && hasEnable {
-			t.Errorf("effort %v must not set enable_thinking", tc.effort)
+		if _, ok := req.ChatTemplateKwargs["thinking"]; ok {
+			t.Error("off must not set thinking")
+		}
+	}
+
+	// Every non-off level: all three on-conventions present.
+	for _, effort := range levels {
+		conv := NewConversation("")
+		conv.SetModel("test-model")
+		conv.AddMessage(llmapi.RoleUser, "hi")
+		req, err := conv.buildRequest(llmapi.Sampling{ReasoningEffort: effort}, false)
+		if err != nil {
+			t.Fatalf("effort %v: buildRequest: %v", effort, err)
+		}
+		if got, ok := req.ChatTemplateKwargs["thinking"]; !ok || got != true {
+			t.Errorf("effort %v: chat_template_kwargs[thinking] = %v (present=%v), want true", effort, got, ok)
+		}
+		if got, ok := req.ChatTemplateKwargs["enable_thinking"]; !ok || got != true {
+			t.Errorf("effort %v: chat_template_kwargs[enable_thinking] = %v (present=%v), want true", effort, got, ok)
+		}
+		if got, ok := req.ChatTemplateKwargs["reasoning_effort"]; !ok || got != effort.String() {
+			t.Errorf("effort %v: chat_template_kwargs[reasoning_effort] = %v (present=%v), want %v", effort, got, ok, effort.String())
 		}
 	}
 }
