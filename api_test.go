@@ -294,7 +294,7 @@ func TestParseSSEStreamReasoningContent(t *testing.T) {
 // treat as off when absent rather than defaulting to on) actually reasons. The zero
 // value (ReasoningOff) means a bare Sampling{} disables reasoning by default.
 func TestReasoningEffortChatTemplateKwargs(t *testing.T) {
-	levels := []llmapi.ReasoningEffort{llmapi.ReasoningLow, llmapi.ReasoningMedium, llmapi.ReasoningHigh, llmapi.ReasoningMax}
+	levels := []llmapi.ReasoningEffort{llmapi.ReasoningLow, llmapi.ReasoningMedium, llmapi.ReasoningHigh, llmapi.ReasoningXHigh, llmapi.ReasoningMax}
 
 	// ReasoningOff: only enable_thinking:false, nothing else.
 	{
@@ -393,6 +393,72 @@ func TestSendsMaxCompletionTokens(t *testing.T) {
 	if v.(float64) != 12 {
 		t.Errorf("max_completion_tokens = %v, want 12", v)
 	}
+}
+
+// TestWireBudgetComputation pins the wire max_completion_tokens computation:
+// desired output (per-call Sampling.DesiredOutputTokens, else Settings
+// MaxTokens as the default desired output) plus the effort tier's reasoning
+// headroom — reasoning models emit thinking into the same completion budget
+// as the answer, so without the reserve the reasoning eats the content budget
+// — clamped to Settings.OutputCeiling, the deployment's real per-request
+// output limit (0 = unknown, no clamp). With no desired output at all, the
+// field stays omitted and the server's own default governs; headroom is never
+// added to a bound the caller declined to set.
+func TestWireBudgetComputation(t *testing.T) {
+	send := func(t *testing.T, mutate func(*Conversation), sampling llmapi.Sampling) map[string]any {
+		t.Helper()
+		conv, rec := newConversation(t, "")
+		conv.Settings.StopSequences = []string{"."} // keep the real inference short
+		mutate(conv)
+		if _, _, _, _, _, _, err := conv.Send("Once upon a time", sampling); err != nil {
+			t.Fatalf("Send: %v", err)
+		}
+		return rec.lastRequest(t)
+	}
+
+	t.Run("reasoning effort adds headroom to the settings default", func(t *testing.T) {
+		body := send(t, func(c *Conversation) { c.Settings.MaxTokens = 2048 },
+			llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh})
+		if v := body["max_completion_tokens"].(float64); v != 18432 {
+			t.Errorf("max_completion_tokens = %v, want 18432 (2048 desired + 16384 high headroom)", v)
+		}
+	})
+
+	t.Run("per-call DesiredOutputTokens overrides the settings default", func(t *testing.T) {
+		body := send(t, func(c *Conversation) { c.Settings.MaxTokens = 2048 },
+			llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh, DesiredOutputTokens: 4096})
+		if v := body["max_completion_tokens"].(float64); v != 20480 {
+			t.Errorf("max_completion_tokens = %v, want 20480 (4096 desired + 16384 high headroom)", v)
+		}
+	})
+
+	t.Run("off reserves nothing", func(t *testing.T) {
+		body := send(t, func(c *Conversation) { c.Settings.MaxTokens = 2048 },
+			llmapi.Sampling{DesiredOutputTokens: 1024})
+		if v := body["max_completion_tokens"].(float64); v != 1024 {
+			t.Errorf("max_completion_tokens = %v, want 1024 (desired only; reasoning off)", v)
+		}
+	})
+
+	t.Run("OutputCeiling clamps the wire total", func(t *testing.T) {
+		body := send(t, func(c *Conversation) {
+			c.Settings.MaxTokens = 4096
+			c.Settings.OutputCeiling = 8192
+		}, llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh})
+		if v := body["max_completion_tokens"].(float64); v != 8192 {
+			t.Errorf("max_completion_tokens = %v, want 8192 (4096+16384 clamped to the deployment ceiling)", v)
+		}
+	})
+
+	t.Run("no desired output leaves the field omitted even with effort", func(t *testing.T) {
+		body := send(t, func(c *Conversation) {
+			c.Settings.MaxTokens = 0
+			c.Settings.StopSequences = []string{" "} // unbounded request; stop fast
+		}, llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh})
+		if v, ok := body["max_completion_tokens"]; ok {
+			t.Errorf("max_completion_tokens = %v, want omitted (caller set no output bound; headroom must not fabricate one)", v)
+		}
+	})
 }
 
 func TestSerializesTools(t *testing.T) {

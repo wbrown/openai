@@ -122,7 +122,7 @@ func (c *Conversation) buildRequest(sampling llmapi.Sampling, stream bool) (chat
 	req := chatCompletionRequest{
 		Model:               c.Settings.Model,
 		Messages:            c.requestMessages(),
-		MaxCompletionTokens: c.Settings.MaxTokens,
+		MaxCompletionTokens: resolveCompletionBudget(c.Settings, sampling),
 		Temperature:         temp,
 		TopP:                topP,
 		Stop:                c.Settings.StopSequences,
@@ -148,6 +148,47 @@ func (c *Conversation) buildRequest(sampling llmapi.Sampling, stream bool) (chat
 	}
 	req.ChatTemplateKwargs = reasoningKwargs(sampling.ReasoningEffort)
 	return req, nil
+}
+
+// reasoningHeadroom is the per-effort reasoning reserve added to the desired
+// output when computing the wire max_completion_tokens: reasoning models emit
+// their thinking into the same completion budget as the answer, so without a
+// reserve the reasoning eats the content budget and the answer truncates. The
+// values match the tiers Anthropic documents for its own shared-pool adaptive
+// thinking (the top tiers carry its documented 64K floor); vLLM backends share
+// the pool the same way.
+var reasoningHeadroom = map[llmapi.ReasoningEffort]int{
+	llmapi.ReasoningLow:    4096,
+	llmapi.ReasoningMedium: 8192,
+	llmapi.ReasoningHigh:   16384,
+	llmapi.ReasoningXHigh:  65536,
+	llmapi.ReasoningMax:    65536,
+}
+
+// resolveCompletionBudget computes the wire max_completion_tokens: the desired
+// output (per-call Sampling.DesiredOutputTokens, else Settings.MaxTokens as
+// the default desired output) plus the requested effort tier's reasoning
+// headroom, clamped to Settings.OutputCeiling — the deployment's real
+// per-request output limit (0 = unknown, no clamp). A desired output of 0
+// (both the per-call value and the settings default unset) returns 0 so the
+// field stays omitted and the server's own default governs: headroom is never
+// added to a bound the caller declined to set.
+func resolveCompletionBudget(s Settings, sampling llmapi.Sampling) int {
+	desired := sampling.DesiredOutputTokens
+	if desired == 0 {
+		desired = s.MaxTokens
+	}
+	if desired == 0 {
+		return 0
+	}
+	wire := desired
+	if sampling.ReasoningEffort != llmapi.ReasoningOff {
+		wire += reasoningHeadroom[sampling.ReasoningEffort]
+	}
+	if s.OutputCeiling > 0 && wire > s.OutputCeiling {
+		wire = s.OutputCeiling
+	}
+	return wire
 }
 
 // reasoningKwargs maps the requested reasoning effort to vLLM chat-template kwargs.
