@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -217,11 +218,11 @@ func TestStreaming(t *testing.T) {
 // forwarded live through the callback (so it is visible), but is NOT part of the
 // returned reply (the generated content), so it never lands in stored output.
 //
-// stopReason is asserted as the raw "stop": parseSSEStream returns the
-// un-normalized finish_reason (streaming.go: stopReason = *choice.FinishReason);
-// the stop→end_turn mapping happens downstream in SendStreaming via
-// normalizeFinishReason(rawStop), which is why TestStreaming (calling the public
-// SendStreaming) sees "end_turn" while this direct-parser test sees "stop".
+// The finish reason is asserted as the raw "stop": parseSSEStream returns the
+// server's finish_reason verbatim on the account's finishReason; the
+// stop→end_turn mapping happens downstream when SendStreaming projects the
+// account, which is why TestStreaming (calling the public SendStreaming) sees
+// "end_turn" while this direct-parser test sees "stop".
 func TestParseSSEStreamReasoningContent(t *testing.T) {
 	// Distinct reasoning vs content strings so assertions can tell them apart.
 	const reasoningA = "Let me reason about the request. "
@@ -258,10 +259,11 @@ func TestParseSSEStreamReasoningContent(t *testing.T) {
 		}
 	}
 
-	text, _, stopReason, _, _, _, err := parseSSEStream(strings.NewReader(sse), cb)
+	parsed, err := parseSSEStream(strings.NewReader(sse), cb)
 	if err != nil {
 		t.Fatalf("parseSSEStream: %v", err)
 	}
+	text, stopReason := parsed.text, parsed.finishReason
 
 	// Reasoning deltas are tagged TokenReasoning and carry the chain-of-thought;
 	// content deltas are tagged TokenContent and carry the answer.
@@ -283,6 +285,190 @@ func TestParseSSEStreamReasoningContent(t *testing.T) {
 	// Raw finish_reason from the parser; see the doc comment above.
 	if stopReason != "stop" {
 		t.Errorf("stop = %q, want %q", stopReason, "stop")
+	}
+}
+
+// sseFixtureConversation serves one recorded SSE stream to every request and
+// returns a Conversation pointed at it, plus the request recorder. The bytes
+// are served as the server put them on the wire, so the account the client
+// reports is checked against real chunk shapes.
+func sseFixtureConversation(t *testing.T, sse []byte) (*Conversation, *recordingHandler) {
+	t.Helper()
+	replay := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		if _, err := w.Write(sse); err != nil {
+			t.Errorf("serve fixture: %v", err)
+		}
+	})
+	rec := &recordingHandler{inner: replay}
+	srv := httptest.NewServer(rec)
+	t.Cleanup(srv.Close)
+
+	conv := NewConversation("")
+	conv.SetEndpoint(srv.URL)
+	conv.SetModel("reasoner")
+	conv.ApiToken = "test-key"
+	return conv, rec
+}
+
+// readFixture returns the bytes of one file under testdata.
+func readFixture(t *testing.T, name string) []byte {
+	t.Helper()
+	data, err := os.ReadFile("testdata/" + name)
+	if err != nil {
+		t.Fatalf("read fixture %s: %v", name, err)
+	}
+	return data
+}
+
+// TestSendRichStreaming_AccountsForTheRequest drives a vLLM stream captured
+// from a reasoning deployment (reasoning deltas, then content, finish_reason
+// "stop", a trailing usage chunk, and per-chunk token_ids) through
+// SendRichStreaming and asserts the response accounts for the request: the
+// completion budget the request carried on the wire, the server's own finish
+// reason beside the normalized stop, and the output tokens attributed per
+// channel from the token ids, summing to the server's completion total.
+func TestSendRichStreaming_AccountsForTheRequest(t *testing.T) {
+	conv, rec := sseFixtureConversation(t, readFixture(t, "vllm_reasoning_then_content.sse"))
+	conv.Settings.MaxTokens = 8192
+	conv.Settings.OutputCeiling = 65536
+
+	rr, err := conv.SendRichStreaming(
+		[]llmapi.ContentBlock{llmapi.NewTextBlock("In one sentence, why does a lever with a longer arm lift a heavier load?")},
+		llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh}, nil)
+	if err != nil {
+		t.Fatalf("SendRichStreaming: %v", err)
+	}
+
+	wire := rec.lastRequest(t)["max_completion_tokens"].(float64)
+	if rr.CompletionBudget != 65536 || int(wire) != rr.CompletionBudget {
+		t.Errorf("CompletionBudget = %d, wire max_completion_tokens = %v; want both 65536 (reasoning on with the deployment ceiling known: the ceiling is the budget)", rr.CompletionBudget, wire)
+	}
+	if rr.FinishReason != "stop" {
+		t.Errorf("FinishReason = %q, want %q (the server's own word)", rr.FinishReason, "stop")
+	}
+	if rr.StopReason != "end_turn" {
+		t.Errorf("StopReason = %q, want %q", rr.StopReason, "end_turn")
+	}
+	if rr.InputTokens != 29 || rr.OutputTokens != 553 {
+		t.Errorf("tokens in=%d out=%d, want in=29 out=553 (the usage chunk)", rr.InputTokens, rr.OutputTokens)
+	}
+	want := llmapi.OutputTokenSplit{Reasoning: 522, Content: 31, Known: true}
+	if rr.OutputSplit != want {
+		t.Errorf("OutputSplit = %+v, want %+v (per-chunk token_ids attributed to the channel of each chunk's delta)", rr.OutputSplit, want)
+	}
+	if got := rr.OutputSplit.Reasoning + rr.OutputSplit.Content; got != rr.OutputTokens {
+		t.Errorf("split sums to %d, want the server's completion_tokens %d", got, rr.OutputTokens)
+	}
+	const answer = "A lever with a longer arm can lift a heavier load because the increased distance from the fulcrum generates greater torque, effectively multiplying the applied force."
+	if rr.Text() != answer {
+		t.Errorf("Text() = %q, want the content deltas only: %q", rr.Text(), answer)
+	}
+}
+
+// TestSendRichStreaming_ReasoningOnlyLengthCut drives a stream that ends on
+// finish_reason "length" after reasoning deltas only. The response reports
+// the raw finish reason, an empty reply, and a known split with every output
+// token on the reasoning channel.
+func TestSendRichStreaming_ReasoningOnlyLengthCut(t *testing.T) {
+	conv, _ := sseFixtureConversation(t, readFixture(t, "vllm_reasoning_only_length.sse"))
+	conv.Settings.MaxTokens = 8192
+
+	rr, err := conv.SendRichStreaming(
+		[]llmapi.ContentBlock{llmapi.NewTextBlock("Lay out the plan.")},
+		llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh}, nil)
+	if err != nil {
+		t.Fatalf("SendRichStreaming: %v", err)
+	}
+	if rr.FinishReason != "length" {
+		t.Errorf("FinishReason = %q, want %q", rr.FinishReason, "length")
+	}
+	if rr.StopReason != "max_tokens" {
+		t.Errorf("StopReason = %q, want %q", rr.StopReason, "max_tokens")
+	}
+	if rr.Text() != "" {
+		t.Errorf("Text() = %q, want empty: the stream carried no content delta", rr.Text())
+	}
+	if rr.CompletionBudget != 24576 {
+		t.Errorf("CompletionBudget = %d, want 24576 (8192 desired + 16384 high headroom, no ceiling)", rr.CompletionBudget)
+	}
+	want := llmapi.OutputTokenSplit{Reasoning: 21, Content: 0, Known: true}
+	if rr.OutputSplit != want {
+		t.Errorf("OutputSplit = %+v, want %+v", rr.OutputSplit, want)
+	}
+	if rr.OutputTokens != 21 {
+		t.Errorf("OutputTokens = %d, want 21", rr.OutputTokens)
+	}
+}
+
+// TestSendRichStreaming_SplitWithoutTokenIDs covers servers that send no
+// per-chunk token_ids. One that reports reasoning_tokens in the usage chunk's
+// completion_tokens_details attributes the split through it, the content
+// count being the remainder of completion_tokens. One that reports neither
+// leaves the split unknown.
+func TestSendRichStreaming_SplitWithoutTokenIDs(t *testing.T) {
+	chunk := func(delta string) string {
+		return `data: {"choices":[{"index":0,"delta":` + delta + `,"finish_reason":null}]}`
+	}
+	stream := func(usage string) []byte {
+		return []byte(strings.Join([]string{
+			chunk(`{"role":"assistant","content":""}`),
+			chunk(`{"reasoning_content":"Weighing the two readings. "}`),
+			chunk(`{"reasoning_content":"The second holds."}`),
+			chunk(`{"content":"The second "}`),
+			chunk(`{"content":"reading holds."}`),
+			`data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}`,
+			`data: {"choices":[],"usage":` + usage + `}`,
+			"data: [DONE]",
+			"",
+		}, "\n\n"))
+	}
+
+	t.Run("from usage details", func(t *testing.T) {
+		conv, _ := sseFixtureConversation(t, stream(`{"prompt_tokens":18,"completion_tokens":12,"total_tokens":30,"completion_tokens_details":{"reasoning_tokens":7}}`))
+		rr, err := conv.SendRichStreaming([]llmapi.ContentBlock{llmapi.NewTextBlock("Which reading holds?")}, llmapi.Sampling{ReasoningEffort: llmapi.ReasoningLow}, nil)
+		if err != nil {
+			t.Fatalf("SendRichStreaming: %v", err)
+		}
+		want := llmapi.OutputTokenSplit{Reasoning: 7, Content: 5, Known: true}
+		if rr.OutputSplit != want {
+			t.Errorf("OutputSplit = %+v, want %+v (reasoning_tokens from usage details, content the remainder)", rr.OutputSplit, want)
+		}
+	})
+
+	t.Run("unknown when the server attributes nothing", func(t *testing.T) {
+		conv, _ := sseFixtureConversation(t, stream(`{"prompt_tokens":18,"completion_tokens":12,"total_tokens":30}`))
+		rr, err := conv.SendRichStreaming([]llmapi.ContentBlock{llmapi.NewTextBlock("Which reading holds?")}, llmapi.Sampling{ReasoningEffort: llmapi.ReasoningLow}, nil)
+		if err != nil {
+			t.Fatalf("SendRichStreaming: %v", err)
+		}
+		if rr.OutputSplit.Known {
+			t.Errorf("OutputSplit = %+v, want unknown: the server reported only a completion total", rr.OutputSplit)
+		}
+		if rr.OutputTokens != 12 {
+			t.Errorf("OutputTokens = %d, want 12", rr.OutputTokens)
+		}
+	})
+}
+
+// TestSendRich_AccountsForTheRequest checks the non-streaming path reports the
+// same account: the budget the request carried and the server's own finish
+// reason paired with its normalized stop.
+func TestSendRich_AccountsForTheRequest(t *testing.T) {
+	conv, rec := newConversation(t, "")
+	conv.Settings.MaxTokens = 12
+
+	rr, err := conv.SendRich([]llmapi.ContentBlock{llmapi.NewTextBlock("Once upon a time")}, llmapi.Sampling{})
+	if err != nil {
+		t.Fatalf("SendRich: %v", err)
+	}
+	wire := rec.lastRequest(t)["max_completion_tokens"].(float64)
+	if rr.CompletionBudget != 12 || int(wire) != rr.CompletionBudget {
+		t.Errorf("CompletionBudget = %d, wire max_completion_tokens = %v; want both 12", rr.CompletionBudget, wire)
+	}
+	pairs := map[string]string{"stop": "end_turn", "length": "max_tokens"}
+	if want, ok := pairs[rr.FinishReason]; !ok || rr.StopReason != want {
+		t.Errorf("FinishReason = %q, StopReason = %q; want the server's stop or length paired with its normalized form", rr.FinishReason, rr.StopReason)
 	}
 }
 
@@ -395,13 +581,15 @@ func TestSendsMaxCompletionTokens(t *testing.T) {
 	}
 }
 
-// TestWireBudgetComputation pins the wire max_completion_tokens computation:
-// desired output (per-call Sampling.DesiredOutputTokens, else Settings
-// MaxTokens as the default desired output) plus the effort tier's reasoning
-// headroom — reasoning models emit thinking into the same completion budget
-// as the answer, so without the reserve the reasoning eats the content budget
-// — clamped to Settings.OutputCeiling, the deployment's real per-request
-// output limit (0 = unknown, no clamp). With no desired output at all, the
+// TestWireBudgetComputation pins the wire max_completion_tokens computation.
+// Reasoning models emit thinking into the same completion budget as the
+// answer, and how much they think is not a function of the effort tier, so a
+// reasoning-on request's budget is Settings.OutputCeiling, the deployment's
+// real per-request output limit, whenever the deployment reports one. Where
+// the ceiling is unknown (0), the budget is the desired output (per-call
+// Sampling.DesiredOutputTokens, else Settings.MaxTokens as the default desired
+// output) plus the effort tier's reasoning headroom. Reasoning off sends the
+// desired output, clamped to the ceiling. With no desired output at all, the
 // field stays omitted and the server's own default governs; headroom is never
 // added to a bound the caller declined to set.
 func TestWireBudgetComputation(t *testing.T) {
@@ -447,6 +635,26 @@ func TestWireBudgetComputation(t *testing.T) {
 		}, llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh})
 		if v := body["max_completion_tokens"].(float64); v != 8192 {
 			t.Errorf("max_completion_tokens = %v, want 8192 (4096+16384 clamped to the deployment ceiling)", v)
+		}
+	})
+
+	t.Run("reasoning on takes a known deployment ceiling as its budget", func(t *testing.T) {
+		body := send(t, func(c *Conversation) {
+			c.Settings.MaxTokens = 8192
+			c.Settings.OutputCeiling = 65536
+		}, llmapi.Sampling{ReasoningEffort: llmapi.ReasoningHigh})
+		if v := body["max_completion_tokens"].(float64); v != 65536 {
+			t.Errorf("max_completion_tokens = %v, want 65536 (the deployment ceiling: how much the model thinks is not a function of the effort tier)", v)
+		}
+	})
+
+	t.Run("reasoning off with a known ceiling sends the desired output", func(t *testing.T) {
+		body := send(t, func(c *Conversation) {
+			c.Settings.MaxTokens = 8192
+			c.Settings.OutputCeiling = 65536
+		}, llmapi.Sampling{})
+		if v := body["max_completion_tokens"].(float64); v != 8192 {
+			t.Errorf("max_completion_tokens = %v, want 8192 (desired only; reasoning off)", v)
 		}
 	})
 

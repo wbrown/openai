@@ -187,6 +187,12 @@ type usage struct {
 	PromptTokensDetails struct {
 		CachedTokens int `json:"cached_tokens"`
 	} `json:"prompt_tokens_details"`
+	// CompletionTokensDetails attributes the completion tokens by channel
+	// where the server does so. ReasoningTokens is nil when the server
+	// reported no attribution; a reported zero is a real zero.
+	CompletionTokensDetails struct {
+		ReasoningTokens *int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details"`
 }
 
 // apiError is the error object returned by the API.
@@ -216,6 +222,12 @@ type streamChunk struct {
 			ToolCalls        []toolCall `json:"tool_calls,omitempty"`
 		} `json:"delta"`
 		FinishReason *string `json:"finish_reason"`
+		// TokenIDs are the ids of the tokens this chunk's delta carries. vLLM
+		// sends them at the choice level beside delta and finish_reason. They
+		// belong to the channel of the chunk's delta; a chunk carrying ids and
+		// no text carries a channel's closing token or the end-of-sequence
+		// token.
+		TokenIDs []int `json:"token_ids"`
 	} `json:"choices"`
 	Usage *usage `json:"usage,omitempty"`
 }

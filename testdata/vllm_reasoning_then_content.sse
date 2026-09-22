@@ -1,0 +1,294 @@
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"prompt_token_ids":null,"prompt_text":null}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"1"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[16]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":".  **Analyze the Request:**\n    *   Topic: Why a lever with a longer arm lifts"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[13,220,3070,2082,55481,279,6145,25,1019,262,353,256,32755,25,8428,264,27413,448,264,5021,6773,52714]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a heavier load.\n    *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,43571,2795,624,262,353]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"   Constraint: Exactly"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[256,44008,25,67992]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" ONE"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[23970]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" sentence.\n\n2.  **"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11646,382,17,13,220,3070]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"Understand the Physics:"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[16236,2685,279,27226,25]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"**\n    *   A lever"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1019,262,353,256,362,27413]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" works based"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[4278,3118]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" on the principle of moments ("},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[389,279,17484,315,13934,320]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"torque).\n    *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[10975,591,4292,262,353,256]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"   Torque = Force"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[8443,591,284,11726]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" × Distance ("},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[24692,31008,320]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"from the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1499,279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" fulcrum).\n    *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5599,5082,372,4292,262,353]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"   A longer effort"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[256,362,5021,5041]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm means"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773,3363]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a smaller force is"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,9152,5344,374]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" needed"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[4362]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" to produce the same torque"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[311,8192,279,1852,40801]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" to"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[311]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" balance"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[8171]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" or"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[476]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" lift the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11887,279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" load on the shorter"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[2795,389,279,23263]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":".\n    *   Wait"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[624,262,353,256,13815]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":", the prompt says \"lever"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11,279,9929,2727,330,71257]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" with a longer arm lifts"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[448,264,5021,6773,52714]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a heavier load\". Usually"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,43571,2795,3263,32810]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":", a"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11,264]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" longer *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5021,353]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"effort*"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6445,371,9]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm means"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773,3363]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" you can lift a heavier"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[498,646,11887,264,43571]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[353]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"load* with the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1078,9,448,279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" same effort"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1852,5041]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" force"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5344]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":". If"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[13,1416]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" you"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[498]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" apply"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[3796]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" same force"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1852,5344]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" over"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[916]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a longer distance"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,5021,6010]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":", you"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11,498]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" generate"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6923]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" more torque."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[803,40801,382]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"\n\n3.  **Drafting"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[18,13,220,3070,49764,287]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" the sentence:**\n    *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279,11646,25,1019,262,353]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"   *Draft 1:*"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[256,353,49764,220,16,53031]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" A lever"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[362,27413]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" with a longer effort"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[448,264,5021,5041]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm can"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773,646]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" lift a heavier load because the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11887,264,43571,2795,1576,279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" increased distance from the fulcr"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7172,6010,504,279,5599,5082]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"um ampl"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[372,22337]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"ifies the torque"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[9602,279,40801]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" generated"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7907]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" by the applied force, allowing"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[553,279,9248,5344,11,10688]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a small"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,2613]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" effort to overcome"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5041,311,22222]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a larger resistance"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,8130,13634]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":".\n    *   *Draft"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[624,262,353,256,353,49764]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" 2:* A lever with"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[220,17,53031,362,27413,448]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a longer arm lifts a heavier"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,5021,6773,52714,264,43571]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" load because torque"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[2795,1576,40801]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" is the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[374,279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" product of force and distance,"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1985,315,5344,323,6010,11]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" meaning the increased"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7290,279,7172]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" distance from the fulcrum"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6010,504,279,5599,5082,372]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" multiplies the applied force."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7299,7202,279,9248,5344,624]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"\n    *   *Draft"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[262,353,256,353,49764,220]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" 3:* A lever with a"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[18,53031,362,27413,448,264]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" longer effort"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5021,5041]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm can lift a heavier load"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773,646,11887,264,43571,2795]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" because the greater"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1576,279,7046]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" distance from the fulcrum"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6010,504,279,5599,5082,372]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" multiplies the applied force,"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7299,7202,279,9248,5344,11]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" generating"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[23100]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" more torque to"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[803,40801,311]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" overcome"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[22222]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" the load"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279,2795]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"'s resistance"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[594,13634]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":".\n\n4.  **Ref"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[382,19,13,220,3070,3945]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"ining and checking"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5740,323,13287]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" constraints:**\n    *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[16963,25,1019,262,353,256]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"   Must"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[15453]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" be one sentence."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[387,825,11646,624]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"\n    *   Must"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[262,353,256,15453]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" directly"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5961]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" answer the \""},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[4226,279,330]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"why\"."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[34464,22895]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"\n    *   Draft 2"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[262,353,256,28464,220,17]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" is concise"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[374,63141]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":":"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[25]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" \"A lever with a longer"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[330,32,27413,448,264,5021]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm lifts"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773,52714]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a heavier load because the increased"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,43571,2795,1576,279,7172]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" distance from the fulcrum"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6010,504,279,5599,5082,372]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" ampl"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[22337]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"ifies the applied force through"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[9602,279,9248,5344,1526]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" greater torque,"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7046,40801,11]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" allowing a smaller effort to overcome"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[10688,264,9152,5041,311,22222]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" a larger weight"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[264,8130,4680]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":".\" ("},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1189,320]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"A bit word"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[32,2699,3409]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"y)"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[88,340]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"\n    *   Let's simplify"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[262,353,256,6771,594,39506]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":": \"A lever with a"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[25,330,32,27413,448,264]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" longer effort"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5021,5041]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" arm lifts a heavier load because"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[6773,52714,264,43571,2795,1576]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" the increased distance from the ful"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279,7172,6010,504,279,5599]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"crum generates"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5082,372,26799]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" greater torque for"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7046,40801,369]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" the same amount"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279,1852,3311]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" of applied force.\"\n    *"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[315,9248,5344,10035,262,353]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"   Let"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[256,6771]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"'s make sure"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[594,1281,2704]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" it directly"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[432,5961]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" answers"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11248]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" the prompt's"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279,9929,594]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" exact"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[4734]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" phrasing: \"A lever"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[1319,95668,25,330,32,27413]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" with a longer arm lifts a"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[448,264,5021,6773,52714,264]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" heavier load because the increased distance"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[43571,2795,1576,279,7172,6010]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" from the fulcrum generates"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[504,279,5599,5082,372,26799]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" greater torque, effectively"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7046,40801,11,13435]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" multiplying the applied force.\""},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[83497,279,9248,5344,2217]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"\n\n5.  **Final Polish"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[20,13,220,3070,19321,31845]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":":**\n    A"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[25,1019,262,362]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" lever with a longer arm can"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[27413,448,264,5021,6773,646]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" lift a heavier load because the"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[11887,264,43571,2795,1576,279]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" increased distance from the fulcr"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[7172,6010,504,279,5599,5082]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":"um generates greater torque, effectively"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[372,26799,7046,40801,11,13435]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"reasoning":" multiplying the applied force."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[83497,279,9248,5344,13]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[154842]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"content":"A lever with a longer arm"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[32,27413,448,264,5021,6773]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"content":" can lift a heavier load because"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[646,11887,264,43571,2795,1576]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"content":" the increased distance from the ful"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[279,7172,6010,504,279,5599]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"content":"crum generates greater torque,"},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[5082,372,26799,7046,40801,11]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{"content":" effectively multiplying the applied force."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[13435,83497,279,9248,5344,13]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[{"index":0,"delta":{},"logprobs":null,"processed_logprobs":null,"finish_reason":"stop","stop_reason":154827,"token_ids":[154827]}]}
+
+data: {"id":"chatcmpl-84f4c5b39eb12850","object":"chat.completion.chunk","created":1790090937,"model":"green","choices":[],"usage":{"prompt_tokens":29,"total_tokens":582,"completion_tokens":553},"system_fingerprint":"vllm-0.27.1-tp8-a27e9ddb"}
+
+data: [DONE]
+
