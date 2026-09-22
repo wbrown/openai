@@ -1,0 +1,12 @@
+data: {"id":"chatcmpl-reasoning-only-length","object":"chat.completion.chunk","created":1790090937,"model":"reasoner","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"prompt_token_ids":null,"prompt_text":null}
+
+data: {"id":"chatcmpl-reasoning-only-length","object":"chat.completion.chunk","created":1790090937,"model":"reasoner","choices":[{"index":0,"delta":{"reasoning":"Let me lay out the whole plan before writing anything."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[10,20,30,40,50,60,70,80,90,100]}]}
+
+data: {"id":"chatcmpl-reasoning-only-length","object":"chat.completion.chunk","created":1790090937,"model":"reasoner","choices":[{"index":0,"delta":{"reasoning":" First, an inventory of everything the question asks for."},"logprobs":null,"processed_logprobs":null,"finish_reason":null,"token_ids":[110,120,130,140,150,160,170,180]}]}
+
+data: {"id":"chatcmpl-reasoning-only-length","object":"chat.completion.chunk","created":1790090937,"model":"reasoner","choices":[{"index":0,"delta":{"reasoning":" Second, the"},"logprobs":null,"processed_logprobs":null,"finish_reason":"length","stop_reason":null,"token_ids":[190,200,210]}]}
+
+data: {"id":"chatcmpl-reasoning-only-length","object":"chat.completion.chunk","created":1790090937,"model":"reasoner","choices":[],"usage":{"prompt_tokens":40,"total_tokens":61,"completion_tokens":21},"system_fingerprint":"vllm-0.27.1-tp8-a27e9ddb"}
+
+data: [DONE]
+

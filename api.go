@@ -151,12 +151,13 @@ func (c *Conversation) buildRequest(sampling llmapi.Sampling, stream bool) (chat
 }
 
 // reasoningHeadroom is the per-effort reasoning reserve added to the desired
-// output when computing the wire max_completion_tokens: reasoning models emit
-// their thinking into the same completion budget as the answer, so without a
-// reserve the reasoning eats the content budget and the answer truncates. The
-// values match the tiers Anthropic documents for its own shared-pool adaptive
-// thinking (the top tiers carry its documented 64K floor); vLLM backends share
-// the pool the same way.
+// output when computing the wire max_completion_tokens on a deployment whose
+// output ceiling is unknown: reasoning models emit their thinking into the
+// same completion budget as the answer, so without a reserve the reasoning
+// eats the content budget and the answer truncates. The values match the
+// tiers Anthropic documents for its own shared-pool adaptive thinking (the
+// top tiers carry its documented 64K floor); vLLM backends share the pool the
+// same way.
 var reasoningHeadroom = map[llmapi.ReasoningEffort]int{
 	llmapi.ReasoningLow:    4096,
 	llmapi.ReasoningMedium: 8192,
@@ -165,14 +166,20 @@ var reasoningHeadroom = map[llmapi.ReasoningEffort]int{
 	llmapi.ReasoningMax:    65536,
 }
 
-// resolveCompletionBudget computes the wire max_completion_tokens: the desired
-// output (per-call Sampling.DesiredOutputTokens, else Settings.MaxTokens as
-// the default desired output) plus the requested effort tier's reasoning
-// headroom, clamped to Settings.OutputCeiling — the deployment's real
-// per-request output limit (0 = unknown, no clamp). A desired output of 0
-// (both the per-call value and the settings default unset) returns 0 so the
-// field stays omitted and the server's own default governs: headroom is never
-// added to a bound the caller declined to set.
+// resolveCompletionBudget computes the wire max_completion_tokens from the
+// desired output (per-call Sampling.DesiredOutputTokens, else Settings.MaxTokens
+// as the default desired output) and Settings.OutputCeiling, the deployment's
+// real per-request output limit (0 = unknown). A desired output of 0 (both the
+// per-call value and the settings default unset) returns 0 so the field stays
+// omitted and the server's own default governs: no budget is fabricated for a
+// bound the caller declined to set.
+//
+// With reasoning on, the budget is the ceiling whenever the deployment reports
+// one: how much the model thinks is not a function of the effort tier, and the
+// ceiling is the deployment's whole per-request limit. Where the ceiling is
+// unknown, the budget is the desired output plus the effort tier's reasoning
+// headroom. With reasoning off, the budget is the desired output, clamped to
+// the ceiling.
 func resolveCompletionBudget(s Settings, sampling llmapi.Sampling) int {
 	desired := sampling.DesiredOutputTokens
 	if desired == 0 {
@@ -181,14 +188,16 @@ func resolveCompletionBudget(s Settings, sampling llmapi.Sampling) int {
 	if desired == 0 {
 		return 0
 	}
-	wire := desired
 	if sampling.ReasoningEffort != llmapi.ReasoningOff {
-		wire += reasoningHeadroom[sampling.ReasoningEffort]
+		if s.OutputCeiling > 0 {
+			return s.OutputCeiling
+		}
+		return desired + reasoningHeadroom[sampling.ReasoningEffort]
 	}
-	if s.OutputCeiling > 0 && wire > s.OutputCeiling {
-		wire = s.OutputCeiling
+	if s.OutputCeiling > 0 && desired > s.OutputCeiling {
+		return s.OutputCeiling
 	}
-	return wire
+	return desired
 }
 
 // reasoningKwargs maps the requested reasoning effort to vLLM chat-template kwargs.
@@ -306,34 +315,102 @@ func (c *Conversation) postRequest(req chatCompletionRequest) (*chatCompletionRe
 	return &cr, nil
 }
 
+// requestAccount is everything one request produced: what the provider sent
+// (the completion budget the request carried) and what the server reported
+// (the reply, its tool calls, the finish reason verbatim, the usage block, and
+// the output tokens attributed per channel). Send, SendRich, SendStreaming and
+// SendRichStreaming all project from it.
+type requestAccount struct {
+	text      string
+	toolCalls []toolCall
+	// finishReason is the server's finish_reason as sent; "" when the server
+	// reported none.
+	finishReason string
+	// usage is the server's usage block; the zero value when it sent none.
+	usage usage
+	// split is the per-channel attribution of usage.CompletionTokens.
+	split llmapi.OutputTokenSplit
+	// budget is the max_completion_tokens the request carried; 0 when the
+	// request carried none.
+	budget int
+}
+
+// tuple projects the account onto the seven-value Conversation methods: the
+// reply, the normalized stop, and the four token counts. cacheCreationTokens
+// is always 0 (OpenAI does not bill cache writes); cacheReadTokens is the
+// automatic prompt-cache hit reported in usage.prompt_tokens_details.
+func (a requestAccount) tuple() (reply, stopReason string, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens int) {
+	return a.text,
+		normalizeFinishReason(a.finishReason),
+		a.usage.PromptTokens,
+		a.usage.CompletionTokens,
+		0,
+		a.usage.PromptTokensDetails.CachedTokens
+}
+
+// richResponse renders the account as the llmapi response: the content blocks
+// from the reply and its tool calls, with the account beside them.
+func (a requestAccount) richResponse() *llmapi.RichResponse {
+	return &llmapi.RichResponse{
+		Content:                  messageToBlocks(responseMessage{Content: a.text, ToolCalls: a.toolCalls}),
+		StopReason:               normalizeFinishReason(a.finishReason),
+		InputTokens:              a.usage.PromptTokens,
+		OutputTokens:             a.usage.CompletionTokens,
+		CacheCreationInputTokens: 0,
+		CacheReadInputTokens:     a.usage.PromptTokensDetails.CachedTokens,
+		CompletionBudget:         a.budget,
+		FinishReason:             a.finishReason,
+		OutputSplit:              a.split,
+	}
+}
+
+// splitFromUsage attributes the completion tokens by channel from the usage
+// block's reasoning_tokens when the server reported it, the content count
+// being the remainder of completion_tokens. Unknown when the server reported
+// no attribution.
+func splitFromUsage(u usage) llmapi.OutputTokenSplit {
+	if u.CompletionTokensDetails.ReasoningTokens == nil {
+		return llmapi.OutputTokenSplit{}
+	}
+	reasoning := *u.CompletionTokensDetails.ReasoningTokens
+	return llmapi.OutputTokenSplit{Reasoning: reasoning, Content: u.CompletionTokens - reasoning, Known: true}
+}
+
 // exchange adds the user text (when non-empty), sends the conversation, appends
-// the assistant reply to history, and accumulates usage. With empty text it
-// resends the current history (OpenAI chat has no assistant-prefill), erroring
-// only when there is nothing to send.
-func (c *Conversation) exchange(text string, sampling llmapi.Sampling) (*chatCompletionResponse, error) {
+// the assistant reply to history, accumulates usage, and returns the request's
+// account. With empty text it resends the current history (OpenAI chat has no
+// assistant-prefill), erroring only when there is nothing to send.
+func (c *Conversation) exchange(text string, sampling llmapi.Sampling) (requestAccount, error) {
 	if text != "" {
 		c.AddMessage(llmapi.RoleUser, text)
 	} else if len(c.Messages) == 0 {
-		return nil, fmt.Errorf("cannot generate: no messages in conversation")
+		return requestAccount{}, fmt.Errorf("cannot generate: no messages in conversation")
 	}
 
 	req, err := c.buildRequest(sampling, false)
 	if err != nil {
-		return nil, err
+		return requestAccount{}, err
 	}
 	cr, err := c.postRequest(req)
 	if err != nil {
-		return nil, err
+		return requestAccount{}, err
 	}
 
-	msg := cr.Choices[0].Message
+	choice := cr.Choices[0]
 	c.Messages = append(c.Messages, chatMessage{
 		Role:      "assistant",
-		Content:   assistantContent(msg.Content),
-		ToolCalls: msg.ToolCalls,
+		Content:   assistantContent(choice.Message.Content),
+		ToolCalls: choice.Message.ToolCalls,
 	})
 	c.accumulateUsage(cr.Usage)
-	return cr, nil
+	return requestAccount{
+		text:         choice.Message.Content,
+		toolCalls:    choice.Message.ToolCalls,
+		finishReason: choice.FinishReason,
+		usage:        cr.Usage,
+		split:        splitFromUsage(cr.Usage),
+		budget:       req.MaxCompletionTokens,
+	}, nil
 }
 
 // accumulateUsage folds one response's usage into the conversation total.
@@ -347,26 +424,18 @@ func (c *Conversation) accumulateUsage(u usage) {
 // Send
 // ==========================================================================
 
-// Send sends a user message and returns the assistant's reply. cacheCreationTokens
-// is always 0 (OpenAI does not bill cache writes); cacheReadTokens reflects the
-// automatic prompt-cache hit reported in usage.prompt_tokens_details.
+// Send sends a user message and returns the assistant's reply.
 func (c *Conversation) Send(text string, sampling llmapi.Sampling) (
 	reply, stopReason string,
 	inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens int,
 	err error,
 ) {
-	cr, err := c.exchange(text, sampling)
+	acct, err := c.exchange(text, sampling)
 	if err != nil {
 		return "", "", 0, 0, 0, 0, err
 	}
-	choice := cr.Choices[0]
-	return choice.Message.Content,
-		normalizeFinishReason(choice.FinishReason),
-		cr.Usage.PromptTokens,
-		cr.Usage.CompletionTokens,
-		0,
-		cr.Usage.PromptTokensDetails.CachedTokens,
-		nil
+	reply, stopReason, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens = acct.tuple()
+	return reply, stopReason, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, nil
 }
 
 // SendUntilDone repeatedly calls Send until stopReason != "max_tokens",
@@ -406,30 +475,18 @@ func (c *Conversation) SendUntilDone(text string, sampling llmapi.Sampling) (
 // Rich content
 // ==========================================================================
 
-// SendRich sends rich content blocks and returns the full response. If content
-// is empty it continues from the current history.
+// SendRich sends rich content blocks and returns the full response: the
+// content blocks and the account of the request that produced them. If
+// content is empty it continues from the current history.
 func (c *Conversation) SendRich(content []llmapi.ContentBlock, sampling llmapi.Sampling) (*llmapi.RichResponse, error) {
 	if len(content) > 0 {
 		c.AddRichMessage(llmapi.RoleUser, content)
 	}
-	cr, err := c.exchange("", sampling)
+	acct, err := c.exchange("", sampling)
 	if err != nil {
 		return nil, err
 	}
-	return responseToRich(cr), nil
-}
-
-// responseToRich converts a parsed response into an llmapi.RichResponse.
-func responseToRich(cr *chatCompletionResponse) *llmapi.RichResponse {
-	choice := cr.Choices[0]
-	return &llmapi.RichResponse{
-		Content:                  messageToBlocks(choice.Message),
-		StopReason:               normalizeFinishReason(choice.FinishReason),
-		InputTokens:              cr.Usage.PromptTokens,
-		OutputTokens:             cr.Usage.CompletionTokens,
-		CacheCreationInputTokens: 0,
-		CacheReadInputTokens:     cr.Usage.PromptTokensDetails.CachedTokens,
-	}
+	return acct.richResponse(), nil
 }
 
 // messageToBlocks converts an assistant response message into content blocks:
